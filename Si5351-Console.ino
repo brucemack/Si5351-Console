@@ -14,16 +14,16 @@ unsigned long f0 = 5000000UL;
 unsigned char d0 = 3;
 unsigned long f2 = 12000000UL;
 unsigned char d2 = 3;
-long cor = -10000L;
+long cor = 19500L;
 unsigned long stepSize = 500;
 int lastClock = 0;
 
 void config() {
-  si5351.set_freq((unsigned long long)f0 * 100ULL,SI5351_CLK0);
-  si5351.drive_strength(SI5351_CLK0,d0);
-  si5351.set_freq((unsigned long long)f2 * 100ULL,SI5351_CLK0);
-  si5351.drive_strength(SI5351_CLK2,d2);
   si5351.set_correction(cor,SI5351_PLL_INPUT_XO);
+  si5351.drive_strength(SI5351_CLK0,d0);
+  si5351.drive_strength(SI5351_CLK2,d2);
+  si5351.set_freq((unsigned long long)f0 * 100ULL,SI5351_CLK0);
+  si5351.set_freq((unsigned long long)f2 * 100ULL,SI5351_CLK2);
 }
 
 void status() {
