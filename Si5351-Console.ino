@@ -225,7 +225,7 @@ void loop() {
       byte* b = (byte*)&state;
       // Magic number
       EEPROM.update(0,0xba);
-      EEPROM.update(0,0xbe);
+      EEPROM.update(1,0xbe);
       for (int i = 0; i < sizeof(State); i++) {
         EEPROM.update(i + 2,b[i]);
       }
