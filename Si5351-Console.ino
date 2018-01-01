@@ -222,7 +222,7 @@ void loop() {
     } else if (commandBuffer.startsWith("ss ")) {
       stepSize = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
-    } else if (commandBuffer.startsWith("st ")) {
+    } else if (commandBuffer.startsWith("st")) {
       printSi5351Status();
       status();
     } else if (commandBuffer.startsWith("-") ||
