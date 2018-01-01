@@ -172,6 +172,7 @@ void loop() {
   else if (mode == 2) {
     
     Serial.println(commandBuffer);
+    bool longStatus = false;
     
     if (commandBuffer.startsWith("f0 ")) {
       f0 = atol(commandBuffer.substring(3).c_str());
@@ -181,61 +182,93 @@ void loop() {
       f2 = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("o0 ")) {
       f0Offset = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("o1 ")) {
       f1Offset = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("o2 ")) {
       f2Offset = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("m0 ")) {
       f0Mult = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("m1 ")) {
       f1Mult = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("m2 ")) {
       f2Mult = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("s0 ")) {
       s0 = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("s1 ")) {
       s1 = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("s2 ")) {
       s2 = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("d0 ")) {
       drive0 = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("d1 ")) {
       drive1 = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("d2 ")) {
       drive2 = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("co ")) {
       cor = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("ss ")) {
       stepSize = atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
     } else if (commandBuffer.startsWith("st ")) {
       printSi5351Status();
-    } else if (commandBuffer.startsWith("-")) {
-      if (s0) {
-        f0 -= stepSize;
-      } 
-      if (s1) {
-        f1 -= stepSize;
-      } 
-      if (s2) {
-        f2 -= stepSize;
-      } 
-    } else if (commandBuffer.startsWith("=")) {
-      if (s0) {
-        f0 += stepSize;
+      status();
+    } else if (commandBuffer.startsWith("-") ||
+               commandBuffer.startsWith("=")) {
+      
+      long mult = 1;
+      if (commandBuffer.startsWith("-")) {
+        mult = -1;
       }
-      if (s1) {
-        f1 += stepSize;
-      } 
-      if (s2) {
-        f2 += stepSize;
-      } 
+
+      if (s0 == 1) {
+        f0 += stepSize * mult;
+      } else if (s0 == 2) {
+        f0Offset += stepSize * mult;
+      }
+      
+      if (s1 == 1) {
+        f1 += stepSize * mult;
+      } else if (s1 == 2) {
+        f1Offset += stepSize * mult;
+      }
+      
+      if (s2 == 1) {
+        f2 += stepSize * mult;
+      } else if (s2 == 2) {
+        f2Offset += stepSize * mult;
+      }
+      
     } else if (commandBuffer.startsWith("?")) {
       printHelp();
     } else {
       Serial.println("Unrecognized");
     }
+    
     config();
-    status();
+
+    if (longStatus) {
+      status();
+    } else {
+      Serial.print(f0);
+      Serial.print(", ");
+      Serial.print(f1);
+      Serial.print(", ");
+      Serial.println(f2);
+    }
+    
     commandBuffer = "";
     mode = 0;
   }
