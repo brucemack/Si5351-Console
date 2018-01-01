@@ -7,38 +7,98 @@
 
 int led = 13;
 Si5351 si5351;
+
 int mode = 0;
 String commandBuffer;
 
-unsigned long f0 = 5000000UL;
-unsigned char d0 = 3;
+unsigned long f0 = 7150000UL;
+long f0Offset = 11997500UL;
+long f0Mult = -1UL;
+unsigned char drive0 = 3;
+long s0 = 1;
+
+unsigned long f1 = 7150000UL;
+long f1Offset = 11997500UL;
+long f1Mult = -1UL;
+unsigned char drive1 = 3;
+long s1 = 0;
+
 unsigned long f2 = 11997500UL;
-unsigned char d2 = 3;
+long f2Offset = 0UL;
+long f2Mult = 1UL;
+unsigned char drive2 = 3;
+long s2 = 0;
+
 long cor = 19500L;
 unsigned long stepSize = 500;
-int lastClock = 0;
 
 void config() {
+  
   si5351.set_correction(cor,SI5351_PLL_INPUT_XO);
-  si5351.drive_strength(SI5351_CLK0,d0);
-  si5351.drive_strength(SI5351_CLK2,d2);
-  si5351.set_freq((unsigned long long)f0 * 100ULL,SI5351_CLK0);
-  si5351.set_freq((unsigned long long)f2 * 100ULL,SI5351_CLK2);
+  
+  si5351.drive_strength(SI5351_CLK0,drive0);
+  si5351.drive_strength(SI5351_CLK2,drive1);
+  si5351.drive_strength(SI5351_CLK2,drive2);
+  
+  long c0 = f0 * f0Mult + f0Offset; 
+  si5351.set_freq((unsigned long long)c0 * 100ULL,SI5351_CLK0);
+  long c1 = f1 * f1Mult + f1Offset; 
+  si5351.set_freq((unsigned long long)c1 * 100ULL,SI5351_CLK1);
+  long c2 = f2 * f2Mult + f2Offset; 
+  si5351.set_freq((unsigned long long)c2 * 100ULL,SI5351_CLK2);
 }
 
 void status() {
-  Serial.print("CLK0:   ");
+
+  Serial.println("----- Clock 0 -----");
+  Serial.print(" . f0:     ");
   Serial.println(f0);
-  Serial.print("CLK2:   ");
+  Serial.print(" . o0:     ");
+  Serial.println(f0Offset);
+  Serial.print(" . m0:     ");
+  Serial.println(f0Mult);
+  Serial.print(" . clk0    ");
+  Serial.println(f0 * f0Mult + f0Offset);
+
+  Serial.println("----- Clock 1 -----");
+  Serial.print(" . f1:     ");
+  Serial.println(f1);
+  Serial.print(" . o1:     ");
+  Serial.println(f1Offset);
+  Serial.print(" . m1:     ");
+  Serial.println(f1Mult);
+  Serial.print(" . clk1    ");
+  Serial.println(f1 * f1Mult + f1Offset);
+
+  Serial.println("----- Clock 2 -----");
+  Serial.print(" . f2:     ");
   Serial.println(f2);
-  Serial.print("COR:    ");
+  Serial.print(" . o2:     ");
+  Serial.println(f2Offset);
+  Serial.print(" . m2:     ");
+  Serial.println(f2Mult);
+  Serial.print(" . clk2    ");
+  Serial.println(f2 * f2Mult + f2Offset);
+
+  Serial.print("cor:       ");
   Serial.println(cor);
-  Serial.print("DRV0:   ");
-  Serial.println(d0);
-  Serial.print("DRV2:   ");
-  Serial.println(d2);
+
+  Serial.print("d0/d1/d2   ");
+  Serial.print(drive0);
+  Serial.print(",");
+  Serial.print(drive1);
+  Serial.print(",");
+  Serial.println(drive2);
+  
   Serial.print("Step:   ");
   Serial.println(stepSize);
+  
+  Serial.print("s0/s1/s2   ");
+  Serial.print(s0);
+  Serial.print(",");
+  Serial.print(s1);
+  Serial.print(",");
+  Serial.println(s2);
 }
 
 void printSi5351Status() {
@@ -60,11 +120,14 @@ void printSi5351Status() {
 }
 
 void printHelp() {
-  Serial.println("c0/c1/c2 <freq Hz>   Set CLK0/1/2 frequency ");
+  Serial.println("f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency ");
+  Serial.println("o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset ");
+  Serial.println("m0/m1/m2 <mult>      Set CLK0/1/2 multipler ");
   Serial.println("d0/d1/d2 <0|1|2|3>   Set CLK0/1/2 drive");
+  Serial.println("s0/s1/s2 <0|1>       Set CLK0/1/2 step-enabled");
   Serial.println("co <correction>      Set correction in PPB");
-  Serial.println("ss <step>            Set step size");
-  Serial.println("st                   Display status");
+  Serial.println("ss <step Hz>         Set step size");
+  Serial.println("st                   Display Si53531 status");
   Serial.println("=                    Step last clock up");
   Serial.println("-                    Step last clock down");
 }
@@ -83,9 +146,6 @@ void setup() {
 
   // Si5351 initialization defaults
   si5351.init(SI5351_CRYSTAL_LOAD_8PF,0,0);
-  // Boost up drive strength
-  si5351.drive_strength(SI5351_CLK0, SI5351_DRIVE_8MA);
-  si5351.drive_strength(SI5351_CLK2, SI5351_DRIVE_8MA);
 
   config();
   printSi5351Status();
@@ -113,44 +173,62 @@ void loop() {
     
     Serial.println(commandBuffer);
     
-    if (commandBuffer.startsWith("c0 ")) {
+    if (commandBuffer.startsWith("f0 ")) {
       f0 = atol(commandBuffer.substring(3).c_str());
-      lastClock = 0;
-    } else if (commandBuffer.startsWith("c2 ")) {
+    } else if (commandBuffer.startsWith("f1 ")) {
+      f1 = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("f2 ")) {
       f2 = atol(commandBuffer.substring(3).c_str());
-      lastClock = 2;
+    } else if (commandBuffer.startsWith("o0 ")) {
+      f0Offset = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("o1 ")) {
+      f1Offset = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("o2 ")) {
+      f2Offset = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("m0 ")) {
+      f0Mult = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("m1 ")) {
+      f1Mult = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("m2 ")) {
+      f2Mult = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("s0 ")) {
+      s0 = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("s1 ")) {
+      s1 = atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("s2 ")) {
+      s2 = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("d0 ")) {
-      d0 = (unsigned char)atol(commandBuffer.substring(3).c_str());
-      lastClock = 0;
+      drive0 = (unsigned char)atol(commandBuffer.substring(3).c_str());
+    } else if (commandBuffer.startsWith("d1 ")) {
+      drive1 = (unsigned char)atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("d2 ")) {
-      d2 = (unsigned char)atol(commandBuffer.substring(3).c_str());
-      lastClock = 2;
+      drive2 = (unsigned char)atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("co ")) {
       cor = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("ss ")) {
       stepSize = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("st ")) {
       printSi5351Status();
-    } else if (commandBuffer.startsWith("bc")) {
-      lastClock = 7;
     } else if (commandBuffer.startsWith("-")) {
-      if (lastClock == 0) {
+      if (s0) {
         f0 -= stepSize;
-      } else if (lastClock == 2) {
+      } 
+      if (s1) {
+        f1 -= stepSize;
+      } 
+      if (s2) {
         f2 -= stepSize;
-      } else if (lastClock == 7) {
-        f0 -= stepSize;
-        f2 -= stepSize;
-      }
+      } 
     } else if (commandBuffer.startsWith("=")) {
-      if (lastClock == 0) {
+      if (s0 == 0) {
         f0 += stepSize;
-      } else if (lastClock == 2) {
-        f2 += stepSize;
-      } else if (lastClock == 7) {
-        f0 += stepSize;
-        f2 += stepSize;
       }
+      if (s1) {
+        f1 += stepSize;
+      } 
+      if (s2) {
+        f2 += stepSize;
+      } 
     } else if (commandBuffer.startsWith("?")) {
       printHelp();
     } else {
