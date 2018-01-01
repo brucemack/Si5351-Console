@@ -1,104 +1,65 @@
 // Si5351 Console
 // Bruce MacKinnon KC1FSZ
 //
+#include "ClockInfo.h"
 #include <SPI.h>
 #include <Wire.h>
 #include <si5351.h>
 
+struct State {
+  ClockInfo clock0;
+  ClockInfo clock1;
+  ClockInfo clock2;
+  long cor = 19500L;
+  unsigned long stepSize = 500;
+};
+
 int led = 13;
 Si5351 si5351;
-
 int mode = 0;
 String commandBuffer;
+State state;
 
-unsigned long f0 = 7150000UL;
-long f0Offset = 11997500UL;
-long f0Mult = -1UL;
-unsigned char drive0 = 3;
-long s0 = 1;
-
-unsigned long f1 = 7150000UL;
-long f1Offset = 11997500UL;
-long f1Mult = -1UL;
-unsigned char drive1 = 3;
-long s1 = 0;
-
-unsigned long f2 = 11997500UL;
-long f2Offset = 0UL;
-long f2Mult = 1UL;
-unsigned char drive2 = 3;
-long s2 = 0;
-
-long cor = 19500L;
-unsigned long stepSize = 500;
-
-void config() {
+void configSi5351() {
   
-  si5351.set_correction(cor,SI5351_PLL_INPUT_XO);
+  si5351.set_correction(state.cor,SI5351_PLL_INPUT_XO);
+
+  if (state.clock0.enabled) {
+    si5351.output_enable(SI5351_CLK0,1);
+    si5351.drive_strength(SI5351_CLK0,state.clock0.driveStrength);
+    si5351.set_freq((unsigned long long)state.clock0.getClockFreq() * 100ULL,SI5351_CLK0);
+  } else {
+    si5351.output_enable(SI5351_CLK0,0);
+  }
   
-  si5351.drive_strength(SI5351_CLK0,drive0);
-  si5351.drive_strength(SI5351_CLK2,drive1);
-  si5351.drive_strength(SI5351_CLK2,drive2);
+  if (state.clock1.enabled) {
+    si5351.output_enable(SI5351_CLK1,1);
+    si5351.drive_strength(SI5351_CLK1,state.clock1.driveStrength);
+    si5351.set_freq((unsigned long long)state.clock1.getClockFreq() * 100ULL,SI5351_CLK1);
+  } else {
+    si5351.output_enable(SI5351_CLK1,0);
+  }
   
-  long c0 = f0 * f0Mult + f0Offset; 
-  si5351.set_freq((unsigned long long)c0 * 100ULL,SI5351_CLK0);
-  long c1 = f1 * f1Mult + f1Offset; 
-  si5351.set_freq((unsigned long long)c1 * 100ULL,SI5351_CLK1);
-  long c2 = f2 * f2Mult + f2Offset; 
-  si5351.set_freq((unsigned long long)c2 * 100ULL,SI5351_CLK2);
+  if (state.clock2.enabled) {
+    si5351.output_enable(SI5351_CLK2,1);
+    si5351.drive_strength(SI5351_CLK2,state.clock2.driveStrength);
+    si5351.set_freq((unsigned long long)state.clock2.getClockFreq() * 100ULL,SI5351_CLK2);
+  } else {
+    si5351.output_enable(SI5351_CLK2,0);
+  }
 }
 
-void status() {
-
+void displayState() {
   Serial.println("----- Clock 0 -----");
-  Serial.print(" . f0:     ");
-  Serial.println(f0);
-  Serial.print(" . o0:     ");
-  Serial.println(f0Offset);
-  Serial.print(" . m0:     ");
-  Serial.println(f0Mult);
-  Serial.print(" . clk0    ");
-  Serial.println(f0 * f0Mult + f0Offset);
-
+  state.clock0.displayStatus();
   Serial.println("----- Clock 1 -----");
-  Serial.print(" . f1:     ");
-  Serial.println(f1);
-  Serial.print(" . o1:     ");
-  Serial.println(f1Offset);
-  Serial.print(" . m1:     ");
-  Serial.println(f1Mult);
-  Serial.print(" . clk1    ");
-  Serial.println(f1 * f1Mult + f1Offset);
-
+  state.clock1.displayStatus();
   Serial.println("----- Clock 2 -----");
-  Serial.print(" . f2:     ");
-  Serial.println(f2);
-  Serial.print(" . o2:     ");
-  Serial.println(f2Offset);
-  Serial.print(" . m2:     ");
-  Serial.println(f2Mult);
-  Serial.print(" . clk2    ");
-  Serial.println(f2 * f2Mult + f2Offset);
-
+  state.clock2.displayStatus();
   Serial.print("cor:       ");
-  Serial.println(cor);
-
-  Serial.print("d0/d1/d2   ");
-  Serial.print(drive0);
-  Serial.print(",");
-  Serial.print(drive1);
-  Serial.print(",");
-  Serial.println(drive2);
-  
+  Serial.println(state.cor);
   Serial.print("Step:   ");
-  Serial.println(stepSize);
-  
-  Serial.print("s0/s1/s2   ");
-  Serial.print(s0);
-  Serial.print(",");
-  Serial.print(s1);
-  Serial.print(",");
-  Serial.println(s2);
+  Serial.println(state.stepSize);
 }
 
 void printSi5351Status() {
@@ -147,9 +108,30 @@ void setup() {
   // Si5351 initialization defaults
   si5351.init(SI5351_CRYSTAL_LOAD_8PF,0,0);
 
-  config();
+  state.clock0.enabled = true;
+  state.clock0.displayFreq = 7150000UL;
+  state.clock0.offset = 11998000UL;
+  state.clock0.mult = -1UL;
+  state.clock0.driveStrength = 3;
+  state.clock0.stepMode = 1;
+
+  state.clock1.enabled = false;
+  state.clock1.displayFreq = 7150000UL;
+  state.clock1.offset = 0UL;
+  state.clock1.mult = 1UL;
+  state.clock1.driveStrength = 0;
+  state.clock1.stepMode = 0;
+  
+  state.clock2.enabled = true;
+  state.clock2.displayFreq = 11998000UL;
+  state.clock2.offset = 0UL;
+  state.clock2.mult = 1UL;
+  state.clock2.driveStrength = 0;
+  state.clock2.stepMode = 0;
+
+  configSi5351();
   printSi5351Status();
-  status();
+  displayState();
 }
 
 // the loop routine runs over and over again forever:
@@ -175,98 +157,81 @@ void loop() {
     bool longStatus = false;
     
     if (commandBuffer.startsWith("f0 ")) {
-      f0 = atol(commandBuffer.substring(3).c_str());
+      state.clock0.displayFreq = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("f1 ")) {
-      f1 = atol(commandBuffer.substring(3).c_str());
+      state.clock1.displayFreq = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("f2 ")) {
-      f2 = atol(commandBuffer.substring(3).c_str());
+      state.clock2.displayFreq = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("o0 ")) {
-      f0Offset = atol(commandBuffer.substring(3).c_str());
+      state.clock0.offset = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("o1 ")) {
-      f1Offset = atol(commandBuffer.substring(3).c_str());
+      state.clock1.offset = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("o2 ")) {
-      f2Offset = atol(commandBuffer.substring(3).c_str());
+      state.clock2.offset = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("m0 ")) {
-      f0Mult = atol(commandBuffer.substring(3).c_str());
+      state.clock0.mult = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("m1 ")) {
-      f1Mult = atol(commandBuffer.substring(3).c_str());
+      state.clock1.mult = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("m2 ")) {
-      f2Mult = atol(commandBuffer.substring(3).c_str());
+      state.clock2.mult = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("s0 ")) {
-      s0 = atol(commandBuffer.substring(3).c_str());
+      state.clock0.stepMode = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("s1 ")) {
-      s1 = atol(commandBuffer.substring(3).c_str());
+      state.clock1.stepMode = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("s2 ")) {
-      s2 = atol(commandBuffer.substring(3).c_str());
+      state.clock2.stepMode = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("d0 ")) {
-      drive0 = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      state.clock0.driveStrength = (unsigned char)atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("d1 ")) {
-      drive1 = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      state.clock1.driveStrength = (unsigned char)atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("d2 ")) {
-      drive2 = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      state.clock2.driveStrength = (unsigned char)atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("co ")) {
-      cor = atol(commandBuffer.substring(3).c_str());
+      state.cor = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("ss ")) {
-      stepSize = atol(commandBuffer.substring(3).c_str());
+      state.stepSize = atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("st")) {
       printSi5351Status();
-      status();
+      displayState();
     } else if (commandBuffer.startsWith("-") ||
                commandBuffer.startsWith("=")) {
-      
       long mult = 1;
       if (commandBuffer.startsWith("-")) {
         mult = -1;
       }
-
-      if (s0 == 1) {
-        f0 += stepSize * mult;
-      } else if (s0 == 2) {
-        f0Offset += stepSize * mult;
-      }
-      
-      if (s1 == 1) {
-        f1 += stepSize * mult;
-      } else if (s1 == 2) {
-        f1Offset += stepSize * mult;
-      }
-      
-      if (s2 == 1) {
-        f2 += stepSize * mult;
-      } else if (s2 == 2) {
-        f2Offset += stepSize * mult;
-      }
-      
+      state.clock0.step(state.stepSize * mult);
+      state.clock1.step(state.stepSize * mult);
+      state.clock2.step(state.stepSize * mult);      
     } else if (commandBuffer.startsWith("?")) {
       printHelp();
     } else {
       Serial.println("Unrecognized");
     }
     
-    config();
+    configSi5351();
 
     if (longStatus) {
-      status();
+      displayState();
     } else {
-      Serial.print(f0);
+      Serial.print(state.clock0.displayFreq);
       Serial.print(", ");
-      Serial.print(f1);
+      Serial.print(state.clock1.displayFreq);
       Serial.print(", ");
-      Serial.println(f2);
+      Serial.println(state.clock2.displayFreq);
     }
     
     commandBuffer = "";
