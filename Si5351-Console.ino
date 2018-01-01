@@ -220,7 +220,7 @@ void loop() {
         f2 -= stepSize;
       } 
     } else if (commandBuffer.startsWith("=")) {
-      if (s0 == 0) {
+      if (s0) {
         f0 += stepSize;
       }
       if (s1) {
