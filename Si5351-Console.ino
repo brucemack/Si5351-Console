@@ -12,7 +12,7 @@ String commandBuffer;
 
 unsigned long f0 = 5000000UL;
 unsigned char d0 = 3;
-unsigned long f2 = 12000000UL;
+unsigned long f2 = 11997500UL;
 unsigned char d2 = 3;
 long cor = 19500L;
 unsigned long stepSize = 500;
@@ -131,16 +131,24 @@ void loop() {
       stepSize = atol(commandBuffer.substring(3).c_str());
     } else if (commandBuffer.startsWith("st ")) {
       printSi5351Status();
+    } else if (commandBuffer.startsWith("bc")) {
+      lastClock = 7;
     } else if (commandBuffer.startsWith("-")) {
       if (lastClock == 0) {
         f0 -= stepSize;
       } else if (lastClock == 2) {
+        f2 -= stepSize;
+      } else if (lastClock == 7) {
+        f0 -= stepSize;
         f2 -= stepSize;
       }
     } else if (commandBuffer.startsWith("=")) {
       if (lastClock == 0) {
         f0 += stepSize;
       } else if (lastClock == 2) {
+        f2 += stepSize;
+      } else if (lastClock == 7) {
+        f0 += stepSize;
         f2 += stepSize;
       }
     } else if (commandBuffer.startsWith("?")) {
