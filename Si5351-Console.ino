@@ -5,6 +5,7 @@
 #include <SPI.h>
 #include <Wire.h>
 #include <si5351.h>
+#include <EEPROM.h>
 
 struct State {
   ClockInfo clock0;
@@ -89,6 +90,8 @@ void printHelp() {
   Serial.println("co <correction>      Set correction in PPB");
   Serial.println("ss <step Hz>         Set step size");
   Serial.println("st                   Display Si53531 status");
+  Serial.println("we                   Save all state in EEPROM");
+  Serial.println("re                   Load all state from EEPROM");
   Serial.println("=                    Step last clock up");
   Serial.println("-                    Step last clock down");
 }
@@ -218,6 +221,25 @@ void loop() {
       state.clock2.step(state.stepSize * mult);      
     } else if (commandBuffer.startsWith("?")) {
       printHelp();
+    } else if (commandBuffer.startsWith("we")) {
+      byte* b = (byte*)&state;
+      // Magic number
+      EEPROM.update(0,0xba);
+      EEPROM.update(0,0xbe);
+      for (int i = 0; i < sizeof(State); i++) {
+        EEPROM.update(i + 2,b[i]);
+      }
+      Serial.println("EEPROM updated");     
+    } else if (commandBuffer.startsWith("re")) {
+      byte* b = (byte*)&state;
+      if (EEPROM.read(0) == 0xba &&
+          EEPROM.read(1) == 0xbe) {
+        for (int i = 0; i < sizeof(State); i++) {
+          b[i] = EEPROM.read(i + 2);
+        }
+       } else {
+        Serial.println("EEPROM invalid");     
+       }
     } else {
       Serial.println("Unrecognized");
     }

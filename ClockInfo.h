@@ -12,8 +12,8 @@ public:
   long offset;
   long mult;
   unsigned char driveStrength;
-  int stepMode;
-
+  unsigned char stepMode;
+  
   void displayStatus();
   void step(long amount);
   // Returns the real clock frequency, taking into account all adjustments
