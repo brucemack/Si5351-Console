@@ -1,11 +1,30 @@
-// Si5351 Console
-// Bruce MacKinnon KC1FSZ
-//
-#include "ClockInfo.h"
+/* 
+ * Si5351 Console
+ * Bruce MacKinnon KC1FSZ
+ * 31-December-2017
+ *  
+ * See https://github.com/brucemack/Si5351-Console for more information.
+ *  
+ * Copyright (C) 2017-2018 Bruce MacKinnon
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include <SPI.h>
 #include <Wire.h>
 #include <si5351.h>
 #include <EEPROM.h>
+#include "ClockInfo.h"
 
 struct State {
   ClockInfo clock0;
@@ -15,7 +34,6 @@ struct State {
   unsigned long stepSize = 500;
 };
 
-int led = 13;
 Si5351 si5351;
 int mode = 0;
 String commandBuffer;
@@ -52,11 +70,11 @@ void configSi5351() {
 
 void displayState() {
   Serial.println("----- Clock 0 -----");
-  state.clock0.displayStatus();
+  state.clock0.displayState();
   Serial.println("----- Clock 1 -----");
-  state.clock1.displayStatus();
+  state.clock1.displayState();
   Serial.println("----- Clock 2 -----");
-  state.clock2.displayStatus();
+  state.clock2.displayState();
   Serial.print("cor:       ");
   Serial.println(state.cor);
   Serial.print("Step:   ");
@@ -82,9 +100,10 @@ void printSi5351Status() {
 }
 
 void printHelp() {
+  Serial.println("e0/e1/e2 <0|1> .     Set CLK0/1/2 enabled");  
   Serial.println("f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency ");
   Serial.println("o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset ");
-  Serial.println("m0/m1/m2 <mult>      Set CLK0/1/2 multipler ");
+  Serial.println("m0/m1/m2 <mult>      Set CLK0/1/2 multiplier ");
   Serial.println("d0/d1/d2 <0|1|2|3>   Set CLK0/1/2 drive");
   Serial.println("s0/s1/s2 <0|1>       Set CLK0/1/2 step-enabled");
   Serial.println("co <correction>      Set correction in PPB");
@@ -99,13 +118,8 @@ void printHelp() {
 // the setup routine runs once when you press reset:
 void setup() {                
   
-  // initialize the digital pin as an output.
-  pinMode(led, OUTPUT);     
-
   Serial.begin(9600);
-  digitalWrite(led,1);
   delay(100);
-  digitalWrite(led,0);
   Serial.println("KC1FSZ Si5351/A Console");
 
   // Si5351 initialization defaults
@@ -200,6 +214,15 @@ void loop() {
       longStatus = true;
     } else if (commandBuffer.startsWith("d2 ")) {
       state.clock2.driveStrength = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
+    } else if (commandBuffer.startsWith("e0 ")) {
+      state.clock0.enabled = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
+    } else if (commandBuffer.startsWith("e1 ")) {
+      state.clock1.enabled = (unsigned char)atol(commandBuffer.substring(3).c_str());
+      longStatus = true;
+    } else if (commandBuffer.startsWith("e2 ")) {
+      state.clock2.enabled = (unsigned char)atol(commandBuffer.substring(3).c_str());
       longStatus = true;
     } else if (commandBuffer.startsWith("co ")) {
       state.cor = atol(commandBuffer.substring(3).c_str());
