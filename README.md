@@ -2,11 +2,13 @@ Si5351/A Console
 ================
 
 A simple Arduino sketch that makes most Si5351/A functions available in
-command-line form using a serial terminal.  This is very useful during the
-bring-up/debug of home-brew radio projects.  Once things are working properly
-some rig-specific firmware is generally needed, but this utility will get
-you up and running quickly/generically without the need for displays, encoders,
-Arduino programming, etc.
+command-line form using a serial terminal (typically: the Arduino "Serial Monitor"
+feature).  
+
+This is very useful during the bring-up/debug of home-brew radio projects.  Once
+things are working properly I generally need some rig-specific firmware, but this
+utility will get you up and running quickly/generically without the need for
+displays, encoders, Arduino programming, etc.
 
 All three clocks on an Si5351 can be controlled independently.
 
