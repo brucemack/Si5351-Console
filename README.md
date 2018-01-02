@@ -10,6 +10,9 @@ things are working properly I generally need some rig-specific firmware, but thi
 utility will get you up and running quickly/generically without the need for
 displays, encoders, Arduino programming, etc.
 
+Once it's running, type a question mark into the monitor and you'll get the
+help message with all of the commands.
+
 All three clocks on an Si5351 can be controlled independently.
 
 Uses the Etherkit Si5351 library.  See: https://github.com/etherkit/Si5351Arduino
@@ -18,6 +21,26 @@ The Si5351/A datasheet is here: https://www.silabs.com/documents/public/data-she
 
 Written by Bruce MacKinnon KC1FSZ
 31-December-2017
+
+Commands
+========
+
+Pressing ? will display this message:
+
+    e0/e1/e2 <0|1>       Set CLK0/1/2 enabled
+    f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency
+    o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset
+    m0/m1/m2 <mult>      Set CLK0/1/2 multiplier
+    d0/d1/d2 <0|1|2|3>   Set CLK0/1/2 drive strength
+    s0/s1/s2 <0|1>       Set CLK0/1/2 step-enabled
+    co <correction>      Set correction in parts-per-billion
+    ss <step Hz>         Set step size
+    st                   Display Si53531/A status
+    we                   Save all state to EEPROM
+    re                   Load all state from EEPROM
+    =                    Step up
+    +                    Step up  
+    -                    Step down
 
 Hardware Requirements
 =====================
@@ -82,23 +105,3 @@ So a typical configuration for filter optimization would put the VFO clock
 into step mode 2 and the BFO clock into step mode 1.  That way pressing +/-
 will move up/down the BFO and the VFO by the right amounts, while staying
 on the same display frequency.  
-
-Commands
-========
-
-Pressing ? will display this message:
-
-    e0/e1/e2 <0|1>       Set CLK0/1/2 enabled
-    f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency
-    o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset
-    m0/m1/m2 <mult>      Set CLK0/1/2 multiplier
-    d0/d1/d2 <0|1|2|3>   Set CLK0/1/2 drive strength
-    s0/s1/s2 <0|1>       Set CLK0/1/2 step-enabled
-    co <correction>      Set correction in parts-per-billion
-    ss <step Hz>         Set step size
-    st                   Display Si53531/A status
-    we                   Save all state to EEPROM
-    re                   Load all state from EEPROM
-    =                    Step up
-    +                    Step up  
-    -                    Step down
