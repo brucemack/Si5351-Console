@@ -1,10 +1,10 @@
 Si5351/A Console
 ================
 
-A simple Arduino sketch that Makes most Si5351/A functions available in
-command-line form.  This is very useful during the bring-up/debug of home-brew
-radio projects.  Once things are working properly some rig-specific firmware is
-generally needed.
+A simple Arduino sketch that makes most Si5351/A functions available in
+command-line form using a serial terminal.  This is very useful during the
+bring-up/debug of home-brew radio projects.  Once things are working properly
+some rig-specific firmware is generally needed.
 
 All three clocks on an Si5351 can be controlled independently.
 
@@ -30,7 +30,7 @@ any terminal program can be used. Be sure to set your terminal program to
 
 The Si5351/A clock is set to this value:
 
-    Display Frequency * Multiplier + Offset
+    Si5351 Clock = Display Frequency * Multiplier + Offset
 
 Illustration For Superhet Developers
 ------------------------------------
@@ -44,10 +44,17 @@ the VFO.  Rather than keeping all of this in your head, you can configure the
 Multiplier to be -1 and the Offset to be 11998000.  When you set the display
 frequency to 7255000 the the output clock is actually set to:
 
-      7255000 * -1 + 11998000 = 4743000
+    7255000 * -1 + 11998000 = 4743000
+
+Or the usual way to think about this:
+
+    11998000 - 7255000 = 4743000
 
 Even better, when you step "up" the display frequency, this actually steps
-down the VFO (as expected).  
+down the VFO (as expected).  So pressing "+" when the step size is 500 Hz will
+set the display frequency to 7255500, but the Si5351 clock will be set to:
+
+    11998000 - 7255500 = 4742500
 
 Another Illustration
 --------------------
@@ -72,6 +79,8 @@ on the same display frequency.
 
 Commands
 ========
+
+Pressing ? will display this message:
 
     e0/e1/e2 <0|1>       Set CLK0/1/2 enabled
     f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency
