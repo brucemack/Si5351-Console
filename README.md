@@ -1,21 +1,34 @@
 Si5351/A Console
 ================
 
-Makes most Si5351/A functions available in command-line form.  This is very
-useful during the bring-up/debug of home-brew radio projects.  Once things
-are working properly some rig-specific firmware is generally needed.
+A simple Arduino sketch that Makes most Si5351/A functions available in
+command-line form.  This is very useful during the bring-up/debug of home-brew
+radio projects.  Once things are working properly some rig-specific firmware is
+generally needed.
 
-Bruce MacKinnon KC1FSZ
+All three clocks on an Si5351 can be controlled independently.
+
+Uses the Etherkit Si5351 library.  See: https://github.com/etherkit/Si5351Arduino
+
+The Si5351/A datasheet is here: https://www.silabs.com/documents/public/data-sheets/Si5351-B.pdf
+
+Written by Bruce MacKinnon KC1FSZ
 31-December-2017
+
+Hardware Requirements
+=====================
+
+This has been developed/tested using an Arduino Pro Mini and an Adafruit
+Si5351 board.  It should work fine on any Arduino/Si5351 board combinations.
 
 Usage Notes
 ===========
 
-This is normally used with the serial monitor component of the Arduino IDE.  
-However, any terminal program can be used. Be sure to set your terminal program
-to 9600/8/N/1 and define the EOL character as "newline" (ie: \n, ASCII 10).
+This is normally used with the serial monitor component of the Arduino IDE.  However,
+any terminal program can be used. Be sure to set your terminal program to
+9600/8/N/1 and define the EOL character as "newline" (ie: \n, ASCII 10).
 
-The Si5351 clock is set to this value:
+The Si5351/A clock is set to this value:
 
     Display Frequency * Multiplier + Offset
 
@@ -48,7 +61,7 @@ But when you shift the BFO you also need to shift the VFO by the same
 amount.  The math here can be tricky as well.  
 
 Step mode "1" causes the display frequency of the selected clock to step
-up or down by the configured step size.  Step mode "2" causes the *offset* 
+up or down by the configured step size.  Step mode "2" causes the *offset*
 of the selected clock to step up/down while keeping the display frequency
 constant.
 
@@ -60,6 +73,7 @@ on the same display frequency.
 Commands
 ========
 
+    e0/e1/e2 <0|1>       Set CLK0/1/2 enabled
     f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency
     o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset
     m0/m1/m2 <mult>      Set CLK0/1/2 multiplier

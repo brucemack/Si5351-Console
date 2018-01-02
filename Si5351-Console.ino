@@ -105,7 +105,7 @@ void printHelp() {
   Serial.println("o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset ");
   Serial.println("m0/m1/m2 <mult>      Set CLK0/1/2 multiplier ");
   Serial.println("d0/d1/d2 <0|1|2|3>   Set CLK0/1/2 drive");
-  Serial.println("s0/s1/s2 <0|1>       Set CLK0/1/2 step-enabled");
+  Serial.println("s0/s1/s2 <0|1>       Set CLK0/1/2 step mode");
   Serial.println("co <correction>      Set correction in PPB");
   Serial.println("ss <step Hz>         Set step size");
   Serial.println("st                   Display Si53531 status");
