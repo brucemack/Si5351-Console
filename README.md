@@ -4,7 +4,9 @@ Si5351/A Console
 A simple Arduino sketch that makes most Si5351/A functions available in
 command-line form using a serial terminal.  This is very useful during the
 bring-up/debug of home-brew radio projects.  Once things are working properly
-some rig-specific firmware is generally needed.
+some rig-specific firmware is generally needed, but this utility will get
+you up and running quickly without the need for displays, encoders, Arduino
+programming, etc.
 
 All three clocks on an Si5351 can be controlled independently.
 
@@ -20,6 +22,8 @@ Hardware Requirements
 
 This has been developed/tested using an Arduino Pro Mini and an Adafruit
 Si5351 board.  It should work fine on any Arduino/Si5351 board combinations.
+
+Reminder to home-brewers: put an RF choke on your USB cable! Mix 31.
 
 Usage Notes
 ===========
