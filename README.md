@@ -14,6 +14,8 @@ See the reference below for the supported commands.
 
 All three clocks on an Si5351 can be controlled independently.
 
+Basic sweep capability is included.
+
 Uses the Etherkit Si5351 library (version 2.1.0).  See: https://github.com/etherkit/Si5351Arduino
 
 The Si5351/A datasheet is here: https://www.silabs.com/documents/public/data-sheets/Si5351-B.pdf
@@ -116,25 +118,30 @@ Sweep Notes
 ===========
 
 The sweep capability can be useful in a number of contexts.  Characterizing
-filters is the one that the capability was created for in the first
+filters is the one that the feature was created for in the first
 place.
 
 Think of the sweep feature as an automation of pressing the +/- buttons a
-bunch of times and recording an analog sample at each step.  Here are
-the key parameters:
+bunch of times and recording an analog sample at each step.  
 
-* Sweep Count - The number of repeated sweeps to perform.  Sometimes if I
+This article on N2CQR's excellent blog site may be helpful context since it
+explains what I was doing when the sweep capability was first implemented: http://soldersmoke.blogspot.com/2017/05/homebrew-peppermint-bitx-kc1fsz-goes.html
+
+Here are the key parameters:
+
+* **Sweep Count** - The number of repeated sweeps to perform.  Sometimes if I
 am looking at the result of the sweep on an old-school analog oscilloscope it
 is useful to run the sweep 100s or even 1000s of times.
-* Step Count - The number of steps in each sweep.  This is self-explanatory.
-* Step Delay - The number of milliseconds we stop at each step in the sweep.
+* **Step Count** - The number of steps in each sweep.  This is self-explanatory.
+* **Step Delay** - The number of milliseconds we stop at each step in the sweep.
 
 At the start of each sweep a digital pin (3 by default) is pulsed high for
 10 milliseconds.  This is a good way to trigger an external tool like an
 oscilloscope or something.
 
 The step size parameter is used to control how far we move in each step.  All
-of the
+of the normal capabilities of the step (step mode, etc.) are honored during the
+sweep.  It's just like pressing +/-.
 
 At the end of each step (i.e. after things have settled) a reading is taken
 from an analog pin (A0 by default) and saved. This can be used to read a
