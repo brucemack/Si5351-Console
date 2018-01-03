@@ -10,8 +10,7 @@ things are working properly you generally need some rig-specific firmware, but t
 utility will get you up and running quickly/generically without the need for
 displays, encoders, Arduino programming, etc.
 
-Once it's running, type a question mark into the monitor and you'll get the
-help message with all of the commands.
+See the reference below for the supported commands.
 
 All three clocks on an Si5351 can be controlled independently.
 
@@ -37,7 +36,7 @@ Commands
     wc <count>           Sets the number of sweep cycles to run
     ws <count>           Sets the number of steps in a sweep
     wd <delay Ms>        Set the delay at each step in milliseconds
-    sw                   Starts a sweep
+    sw                   Starts the sweep sequence
     we                   Save all state to EEPROM
     re                   Load all state from EEPROM
     =                    Step up
