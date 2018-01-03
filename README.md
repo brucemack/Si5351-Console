@@ -14,9 +14,14 @@ See the reference below for the supported commands.
 
 All three clocks on an Si5351 can be controlled independently.
 
-Uses the Etherkit Si5351 library.  See: https://github.com/etherkit/Si5351Arduino
+Uses the Etherkit Si5351 library (version 2.1.0).  See: https://github.com/etherkit/Si5351Arduino
 
 The Si5351/A datasheet is here: https://www.silabs.com/documents/public/data-sheets/Si5351-B.pdf
+
+For reference, testing happened using version 1.8.5 of the Arduino IDE.
+
+Author
+======
 
 Written by Bruce MacKinnon KC1FSZ
 31-December-2017
@@ -25,23 +30,23 @@ Commands
 ========
 
     e0/e1/e2 <0|1>       Set CLK0/1/2 enabled
-    f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency
+    f0/f1/f2 <freq Hz>   Set CLK0/1/2 display frequency
     o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset
     m0/m1/m2 <mult>      Set CLK0/1/2 multiplier
     d0/d1/d2 <0|1|2|3>   Set CLK0/1/2 drive strength
-    s0/s1/s2 <0|1>       Set CLK0/1/2 step-enabled
-    co <correction>      Set correction in parts-per-billion
+    s0/s1/s2 <0|1|2>     Set CLK0/1/2 step mode (0=none, 1=display, 2=offset)
     ss <step Hz>         Set step size
-    st                   Display Si53531/A status
     wc <count>           Sets the number of sweep cycles to run
     ws <count>           Sets the number of steps in a sweep
     wd <delay Ms>        Set the delay at each step in milliseconds
-    sw                   Starts the sweep sequence
+    sw                   Starts the sweep sequence running
     we                   Save all state to EEPROM
     re                   Load all state from EEPROM
     =                    Step up
     +                    Step up  
     -                    Step down
+    st                   Display Si5351/A status
+    co <correction>      Set correction in parts-per-billion
 
 Hardware Requirements
 =====================
@@ -119,14 +124,17 @@ bunch of times and recording an analog sample at each step.  Here are
 the key parameters:
 
 * Sweep Count - The number of repeated sweeps to perform.  Sometimes if I
-am looking at the result of the sweep on an oscilloscope it is useful to
-run the sweep 100s or even 1000s of times.
+am looking at the result of the sweep on an old-school analog oscilloscope it
+is useful to run the sweep 100s or even 1000s of times.
 * Step Count - The number of steps in each sweep.  This is self-explanatory.
 * Step Delay - The number of milliseconds we stop at each step in the sweep.
 
 At the start of each sweep a digital pin (3 by default) is pulsed high for
 10 milliseconds.  This is a good way to trigger an external tool like an
 oscilloscope or something.
+
+The step size parameter is used to control how far we move in each step.  All
+of the
 
 At the end of each step (i.e. after things have settled) a reading is taken
 from an analog pin (A0 by default) and saved. This can be used to read a
