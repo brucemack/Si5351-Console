@@ -52,8 +52,8 @@ Si5351 si5351;
 int mode = 0;
 String commandBuffer;
 State state;
-unsigned int sweepCount;
-unsigned int stepCount;
+unsigned int sweepCounter;
+unsigned int stepCounter;
 unsigned long targetMillis;
 
 int sampleBuffer[MAX_SAMPLE_COUNT];
@@ -334,12 +334,12 @@ void loop() {
   
   // This is the state used to prepare to start a set of sweeps
   else if (mode == 3) {
-    sweepCount = 0;
+    sweepCounter = 0;
     mode = 4;
   } 
   // This is the state at the start of each sweep
   else if (mode == 4) {
-    if (sweepCount < state.sweepCount) {
+    if (sweepCounter < state.sweepCount) {
 
       Serial.print("Trigger");
       
@@ -349,8 +349,8 @@ void loop() {
       delay(10);
       digitalWrite(SWEEP_TRIGGER_PIN,0);
 
-      sweepCount++;
-      stepCount = 0;
+      sweepCounter++;
+      stepCounter = 0;
       mode = 5;
     }
     // This is the case when we have executed all of the requested sweeps. Return to idle state.
@@ -361,11 +361,11 @@ void loop() {
   // This is the state at the start of each step.
   else if (mode == 5) {
     // Check to see if more steps are required in this sweep. If so, launch a step.
-    if (stepCount < state.stepCount) {
+    if (stepCounter < state.stepCount) {
       // Start the waiting clock
       targetMillis = millis() + state.stepDelayMs;
       // Set the new frequency
-      setFreqs(stepCount,state.stepSizeHz);
+      setFreqs(stepCounter,state.stepSizeHz);
       mode = 6;
     }
     // This is the case when we have executed all of the steps in the sweep. Go back and 
@@ -373,14 +373,14 @@ void loop() {
     else {
       // Print out the samples that we collected
       for (int i = 0; i < min(MAX_SAMPLE_COUNT,state.stepCount); i++) {
-        Serial.print(sweepCount);
+        Serial.print(sweepCounter);
         Serial.print(",");
         Serial.print(i);
         Serial.print(",");
         Serial.println(sampleBuffer[i]);
       }
       // Move forward to the next sweep
-      sweepCount++;
+      sweepCounter++;
       mode = 4;
     }
   }
@@ -389,11 +389,11 @@ void loop() {
     // Check to see if we have delayed long enough on this step
     if (millis() >= targetMillis) {
       // Capture an analog sample if we have room in the buffer
-      if (stepCount < MAX_SAMPLE_COUNT) {
-        sampleBuffer[stepCount] = analogRead(ANALOG_SAMPLE_PIN);
+      if (stepCounter < MAX_SAMPLE_COUNT) {
+        sampleBuffer[stepCounter] = analogRead(ANALOG_SAMPLE_PIN);
       }
       // Move forward to the next step
-      stepCount++;
+      stepCounter++;
       mode = 5;      
     }
   }
