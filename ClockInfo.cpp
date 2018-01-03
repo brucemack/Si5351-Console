@@ -50,7 +50,9 @@ unsigned long ClockInfo::getClockFreq() {
 }
 
 unsigned long ClockInfo::getClockFreq(unsigned int stepNumber,long stepSize) {
-  if (stepMode == 1) {
+  if (stepMode == 0) {
+    return displayFreq * mult + offset;   
+  } else if (stepMode == 1) {
     return (displayFreq + (stepNumber * stepSize)) * mult + offset; 
   } else if (stepMode == 2) {
     return displayFreq * mult + offset + (stepNumber * stepSize); 

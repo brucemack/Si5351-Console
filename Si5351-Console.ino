@@ -88,15 +88,14 @@ void configSi5351() {
 }
 
 void setFreqs(unsigned int stepNumber,long stepSize) {
-  Serial.println(state.clock0.getClockFreq(stepNumber,stepSize));
   if (state.clock0.enabled) {
     si5351.set_freq((unsigned long long)state.clock0.getClockFreq(stepNumber,stepSize) * 100ULL,SI5351_CLK0);
   }
   if (state.clock1.enabled) {
-    si5351.set_freq((unsigned long long)state.clock1.getClockFreq(stepNumber,stepSize) * 100ULL,SI5351_CLK0);
+    si5351.set_freq((unsigned long long)state.clock1.getClockFreq(stepNumber,stepSize) * 100ULL,SI5351_CLK1);
   }
   if (state.clock2.enabled) {
-    si5351.set_freq((unsigned long long)state.clock2.getClockFreq(stepNumber,stepSize) * 100ULL,SI5351_CLK0);
+    si5351.set_freq((unsigned long long)state.clock2.getClockFreq(stepNumber,stepSize) * 100ULL,SI5351_CLK2);
   }
 }
 
@@ -211,7 +210,8 @@ void loop() {
     
     Serial.println(commandBuffer);
     bool longStatus = false;
-
+    int nextMode = 0;
+    
     // If an argument was provided parse it into a long.
     long arg = 0;
     if (commandBuffer.length() > 3) {
@@ -285,7 +285,7 @@ void loop() {
       state.stepDelayMs = arg;
       longStatus = true;
     } else if (commandBuffer.startsWith("sw")) {
-      mode = 3;
+      nextMode = 3;
     } else if (commandBuffer.startsWith("st")) {
       printSi5351Status();
       displayState();
@@ -327,7 +327,7 @@ void loop() {
     }
     
     commandBuffer = "";
-    mode = 0;
+    mode = nextMode;
   } 
   
   // ------ Sweep Related States ------------------------------------------------------------------------
@@ -341,20 +341,18 @@ void loop() {
   else if (mode == 4) {
     if (sweepCounter < state.sweepCount) {
 
-      Serial.print("Trigger");
-      
       // Create a 10ms pulse at the start of each sweep.  This might be useful when triggering an 
       // external scope or other test equipment.
       digitalWrite(SWEEP_TRIGGER_PIN,1);
       delay(10);
       digitalWrite(SWEEP_TRIGGER_PIN,0);
 
-      sweepCounter++;
       stepCounter = 0;
       mode = 5;
     }
     // This is the case when we have executed all of the requested sweeps. Return to idle state.
     else {
+      configSi5351();
       mode = 0;
     }
   }
