@@ -104,10 +104,13 @@ adjusting the BFO for the best audio quality.
 But when you shift the BFO you also need to shift the VFO by the same
 amount.  The math here can be tricky as well.  
 
-Step mode "1" causes the display frequency of the selected clock to step
-up or down by the configured step size.  Step mode "2" causes the *offset*
+**Step mode 1** causes the display frequency of the selected clock to step
+up or down by the configured step size.  **Step mode 2** causes the *offset*
 of the selected clock to step up/down while keeping the display frequency
 constant.
+
+**Step mode 0** causes the clock to stay fixed, even when other clocks
+are being moved around.
 
 So a typical configuration for filter optimization would put the VFO clock
 into step mode 2 and the BFO clock into step mode 1.  That way pressing +/-
@@ -118,7 +121,7 @@ Sweep Notes
 ===========
 
 The sweep capability can be useful in a number of contexts.  Characterizing
-filters is the one that the feature was created for in the first
+filters is the one task that the feature was created for in the first
 place.
 
 Think of the sweep feature as an automation of pressing the +/- buttons a
@@ -139,16 +142,17 @@ At the start of each sweep a digital pin (3 by default) is pulsed high for
 10 milliseconds.  This is a good way to trigger an external tool like an
 oscilloscope or something.
 
-The step size parameter is used to control how far we move in each step.  All
+The regular step size parameter is used to control how far we move in each step.  All
 of the normal capabilities of the step (step mode, etc.) are honored during the
-sweep.  It's just like pressing +/-.
+sweep.  It's just like pressing +/- a lot of times!
 
 At the end of each step (i.e. after things have settled) a reading is taken
 from an analog pin (A0 by default) and saved. This can be used to read a
 power level or some other data point.
 
 At the end of each sweep the saved samples are output to the terminal for
-further analysis.  
+further analysis.  I generally copy/paste this data into Excel (LibreOffice)
+or MatLab or something else to get a look at the sweep data.
 
 Version History
 ==============
