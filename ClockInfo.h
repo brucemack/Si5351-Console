@@ -46,6 +46,9 @@ public:
   void step(long amount);
   // Returns the real clock frequency, taking into account all adjustments
   unsigned long getClockFreq();
+  // Returns the real clock frequency, taking into account all adjustments, including 
+  // the application of a sweep step
+  unsigned long getClockFreq(unsigned int stepNumber,long stepSize);
 };
 
 #endif

@@ -6,7 +6,7 @@ command-line form using a serial terminal (typically: the Arduino "Serial Monito
 feature).  
 
 This is very useful during the bring-up/debug of home-brew radio projects.  Once
-things are working properly I generally need some rig-specific firmware, but this
+things are working properly you generally need some rig-specific firmware, but this
 utility will get you up and running quickly/generically without the need for
 displays, encoders, Arduino programming, etc.
 
@@ -25,8 +25,6 @@ Written by Bruce MacKinnon KC1FSZ
 Commands
 ========
 
-Pressing ? will display this message:
-
     e0/e1/e2 <0|1>       Set CLK0/1/2 enabled
     f0/f1/f2 <freq Hz>   Set CLK0/1/2 frequency
     o0/o1/o2 <freq Hz>   Set CLK0/1/2 offset
@@ -36,6 +34,10 @@ Pressing ? will display this message:
     co <correction>      Set correction in parts-per-billion
     ss <step Hz>         Set step size
     st                   Display Si53531/A status
+    wc <count>           Sets the number of sweep cycles to run
+    ws <count>           Sets the number of steps in a sweep
+    wd <delay Ms>        Set the delay at each step in milliseconds
+    sw                   Starts a sweep
     we                   Save all state to EEPROM
     re                   Load all state from EEPROM
     =                    Step up
@@ -105,3 +107,42 @@ So a typical configuration for filter optimization would put the VFO clock
 into step mode 2 and the BFO clock into step mode 1.  That way pressing +/-
 will move up/down the BFO and the VFO by the right amounts, while staying
 on the same display frequency.  
+
+Sweep Notes
+===========
+
+The sweep capability can be useful in a number of contexts.  Characterizing
+filters is the one that the capability was created for in the first
+place.
+
+Think of the sweep feature as an automation of pressing the +/- buttons a
+bunch of times and recording an analog sample at each step.  Here are
+the key parameters:
+
+* Sweep Count - The number of repeated sweeps to perform.  Sometimes if I
+am looking at the result of the sweep on an oscilloscope it is useful to
+run the sweep 100s or even 1000s of times.
+* Step Count - The number of steps in each sweep.  This is self-explanatory.
+* Step Delay - The number of milliseconds we stop at each step in the sweep.
+
+At the start of each sweep a digital pin (3 by default) is pulsed high for
+10 milliseconds.  This is a good way to trigger an external tool like an
+oscilloscope or something.
+
+At the end of each step (i.e. after things have settled) a reading is taken
+from an analog pin (A0 by default) and saved. This can be used to read a
+power level or some other data point.
+
+At the end of each sweep the saved samples are output to the terminal for
+further analysis.  
+
+Version History
+==============
+1.0
+---
+* Initial version
+
+1.1
+---
+* Merged sweep logic from other versions
+* Removed the help to free memory
